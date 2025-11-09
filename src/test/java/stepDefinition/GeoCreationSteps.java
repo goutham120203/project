@@ -23,7 +23,7 @@ public class GeoCreationSteps {
     // private String geographyName;
     // private static String geographysetNameValue = "testing Geography";   // used for debug of inividual scenario
     // private int selectedStoresCount;
-    private int numOfOutletSelected;
+    // private int numOfOutletSelected;
 
 
     @When("Click on Geography")
@@ -217,10 +217,10 @@ public class GeoCreationSteps {
             geographyPage.fillGeoSetForm(data);
     }
 
-    @When("no of outlet selected in retailer")
-    public void no_of_outlet_selected_in_retailer() {
-       numOfOutletSelected = geographyPage.getCountOfOutletsRetailerProfile();
-    }
+    // @When("no of outlet selected in retailer")
+    // public void no_of_outlet_selected_in_retailer() {
+    //    numOfOutletSelected = geographyPage.getCountOfOutletsRetailerProfile();
+    // }
 
     @When("Select {string} in Deliverable")
     public void Select_in_Date_Governance(String deliverable) {
