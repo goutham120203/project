@@ -68,7 +68,6 @@ Feature: Creating Geography Set
         When user fills geography set details 
             | Name                    | Version          | Summary       |  PreviousSet              | Notes     | 
             |testing Geo3             |39.0 \| 2025-10-27| testing       |  NONE - New Geography Set | testing   |
-        And no of outlet selected in retailer
         And Select "Available for Manufacturer Use" in Deliverable
         And Click on Continue button
         Then Geography Creation screen is displayed
