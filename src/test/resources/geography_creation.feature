@@ -260,17 +260,3 @@ Feature: Creating Geography Set
         And Click on Final Submit
         And Click on submit Final on Alert
         Then Final Reports Will Display
-
-
-    
-    
-    
-    
-
-
-
-
-
-
-
-    
