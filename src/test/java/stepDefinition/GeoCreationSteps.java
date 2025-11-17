@@ -310,11 +310,6 @@ public class GeoCreationSteps {
         setupPage.selectFirstOutlet();
     }
 
-    @When("no of outlet selected in retailer")
-    public void captureOutletCount() {
-        numOfOutletSelected = setupPage.getCountOfSelectedOutlets();
-    }
-
     // ==================== Creation & Review ====================
 
     @When("Click on Select button")

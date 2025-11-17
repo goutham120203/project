@@ -67,7 +67,7 @@ Feature: Creating Geography Set
         Given user is on new geography set creation form for retailer
         When user fills geography set details 
             | Name                    | Version          | Summary       |  PreviousSet              | Notes     | 
-            |testing Geo2             |39.0 \| 2025-10-27| testing       |  NONE - New Geography Set | testing   |
+            |testing Geo3             |39.0 \| 2025-10-27| testing       |  NONE - New Geography Set | testing   |
         And no of outlet selected in retailer
         And Select "Available for Manufacturer Use" in Deliverable
         And Click on Continue button
@@ -137,7 +137,7 @@ Feature: Creating Geography Set
         Given user is on new geography set creation form for manufacture
         When user fills geography set details
             | Name                    | Version          | Summary       |  PreviousSet              | Notes     |  Connection |
-            |testing Geography 1      |39.0 \| 2025-10-27| testing       |  NONE - New Geography Set | testing   |  99 test    |
+            |testing Geography 2      |39.0 \| 2025-10-27| testing       |  NONE - New Geography Set | testing   |  99 test    |
         And Select first outlet in outlets
         And Click on Continue button
         And Select Geography creation method "fips" code
@@ -202,7 +202,7 @@ Feature: Creating Geography Set
         Given user is on new geography set creation form for circana
         When user fills geography set details for circana
             | Name                    | Version          | Summary       |  PreviousSet              | Notes     | Type         |
-            |testing Geography        |39.0 \| 2025-10-27| testing       |  NONE - New Geography Set | testing   | Country      |
+            |testing Geography 1       |39.0 \| 2025-10-27| testing       |  NONE - New Geography Set | testing   | Country      |
         And Select first outlet in outlets
         And Click on Continue button
         Then Geography Creation screen is displayed
