@@ -5,6 +5,10 @@ import { ManufacturerPage } from '../pages/manufacturerPage';
 import { RetailerPage } from '../pages/retailerPage';
 import { GeographyMainPage } from '../pages/geographyMainPage';
 import { GeographyCreationPage } from '../pages/geographyCreationPage';
+import { GeographyMappingPage } from '../pages/geographyMappingPage';
+import { ReleaseEvaluationPage } from '../pages/releaseEvaluationPage';
+import { GeographyNamingPage } from '../pages/geographyNamingPage';
+import { FinalReviewPage } from '../pages/finalReviewPage';
 
 type AppFixtures = {
   homePage: HomePage;
@@ -13,6 +17,10 @@ type AppFixtures = {
   retailerPage: RetailerPage;
   geographyMainPage: GeographyMainPage;
   geographyCreationPage: GeographyCreationPage;
+  geographyMappingPage: GeographyMappingPage;
+  releaseEvaluationPage: ReleaseEvaluationPage;
+  geographyNamingPage: GeographyNamingPage;
+  finalReviewPage: FinalReviewPage;
 };
 
 export const test = baseTest.extend<AppFixtures>({
@@ -33,6 +41,18 @@ export const test = baseTest.extend<AppFixtures>({
   },
   geographyCreationPage: async ({ page }, use) => {
     await use(new GeographyCreationPage(page));
+  },
+  geographyMappingPage: async ({ page }, use) => {
+    await use(new GeographyMappingPage(page));
+  },
+  releaseEvaluationPage: async ({ page }, use) => {
+    await use(new ReleaseEvaluationPage(page));
+  },
+  geographyNamingPage: async ({ page }, use) => {
+    await use(new GeographyNamingPage(page));
+  },
+  finalReviewPage: async ({ page }, use) => {
+    await use(new FinalReviewPage(page));
   }
 });
 

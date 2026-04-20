@@ -1,20 +1,22 @@
 import { Locator, Page } from '@playwright/test';
+import { BasePage } from './basePage';
 
-export class GeographyMainPage {
-  readonly page: Page;
+export class GeographyMainPage extends BasePage {
   readonly geographyNav: Locator;
+  readonly searchProfileButton: Locator;
   readonly profileSearchInput: Locator;
   readonly profileRows: Locator;
   readonly geographySearchInput: Locator;
   readonly createNewGeographyButton: Locator;
 
   constructor(page: Page) {
-    this.page = page;
+    super(page);
     this.geographyNav = page.getByText(/Geography/i).first();
-    this.profileSearchInput = page.locator('input[placeholder*="Search"], input[type="search"]').first();
-    this.profileRows = page.locator('.profile-card, .profile-row, .profile-item, .list-group-item');
-    this.geographySearchInput = page.locator('input[placeholder*="Search Geography"], input[placeholder*="Search geographies"], input[placeholder*="Search"]');
-    this.createNewGeographyButton = page.getByRole('button', { name: /create new geography set/i });
+    this.searchProfileButton = page.locator('//*[@id="profileSelect"]');
+    this.profileSearchInput = page.locator('//*[@id="profileSelect"]//input');
+    this.profileRows = page.locator('//*[@id="profileSelect_list"]/p-selectitem/li');
+    this.geographySearchInput = page.locator('//input[@placeholder="Search geography sets..."]');
+    this.createNewGeographyButton = page.getByText('Create New Geography Set');
   }
 
   async openGeography(): Promise<void> {
@@ -22,24 +24,24 @@ export class GeographyMainPage {
   }
 
   async isOnGeographyPage(): Promise<boolean> {
-    return this.page.url().includes('/geography');
+    await this.page.waitForURL('**/geographies**');
+    return this.isOnScreenByURL('geographies');
   }
 
   async openProfileSearch(): Promise<void> {
-    await this.page.getByText(/select a profile to view Geography sets/i).click();
+    await this.searchProfileButton.click();
   }
 
-  async searchProfile(term: string): Promise<void> {
-    await this.profileSearchInput.fill(term);
-    await this.page.waitForTimeout(500);
+  async searchProfile(profileName: string): Promise<void> {
+    await this.clickAndEnter('//*[@id="profileSelect"]//input', profileName);
   }
 
   async getProfileCount(): Promise<number> {
-    return this.profileRows.count();
+    return this.getElementCount('//*[@id="profileSelect_list"]/p-selectitem/li');
   }
 
   async selectProfile(index: number): Promise<void> {
-    await this.profileRows.nth(index - 1).click();
+    await this.page.locator('//*[@id="profileSelect_list"]/p-selectitem/li').nth(index).click();
   }
 
   async searchGeographySet(term: string): Promise<void> {

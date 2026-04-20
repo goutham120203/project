@@ -51,6 +51,18 @@ export const testData = {
     },
     states: {
       california: 'CA'
+    },
+    previousSets: {
+      none: 'NONE - New Geography Set'
+    },
+    messages: {
+      crmaApproved: 'CRMA data approved successfully',
+      mappingSaved: 'Geography mappings have been saved successfully.',
+      mappingApproved: 'Geography mapping successfully approved and moved to next stage.',
+      releaseSaved: 'Release evaluation have been saved successfully.',
+      releaseApproved: 'Release evaluation approved. Redirecting to Geography Naming...',
+      namingApproved: 'Geography Naming successfully approved and moved to next stage.',
+      finalReports: 'Final Reports Will Display'
     }
   },
 
@@ -67,16 +79,17 @@ export const testData = {
     retailer: {
       clientVisibleName: 'WALGREENS testing',
       freshlook: {
-        yes: 'Yes'
+        yes: 'Yes',
+        no: 'No'
       },
       closedAndSold: {
         include: 'INCLUDE',
         exclude: 'EXCLUDE'
       },
       ownerNumber: '1',
+      ownerNumberTest: '12345',
       bannerName: 'banner',
-      notes: 'testing',
-      ownerNumberTest: '12345'
+      notes: 'testing'
     },
     circana: {
       clientVisibleName: 'Circana Test Profile',
