@@ -12,7 +12,10 @@ export class ReleaseEvaluationPage extends BasePage {
   }
 
   async isReleaseEvaluationDisplayed(): Promise<boolean> {
-    return this.header.isVisible();
+
+    await this.page.waitForURL(/.*release-evaluation/, { timeout: 20000 });  
+
+     return await this.header.isVisible({ timeout: 10000 });
   }
 
   async clickSave(): Promise<void> {

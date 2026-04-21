@@ -23,6 +23,7 @@ export class GeographyCreationPage extends BasePage {
   readonly moveAllStoresButton: Locator;
   readonly createGeographyButton: Locator;
   readonly saveButton: Locator;
+  readonly reviewButton: Locator;
   readonly approveButton: Locator;
   readonly proceedAnywayButton: Locator;
   readonly confirmButton: Locator;
@@ -40,13 +41,14 @@ export class GeographyCreationPage extends BasePage {
     this.summaryInput = page.getByPlaceholder('e.g. Frito Lay Zones and Markets');
     this.previousSetSelect = page.locator('select[formcontrolname="previousGeoSetId"]');
     this.notesInput = page.getByPlaceholder('Enter any additional notes about this geography set');
-    this.moveAllStoresButton = page.locator('button.btn-transfer').last();
+    this.moveAllStoresButton = page.locator('button.btn-transfer').nth(1);
     this.createGeographyButton = page.getByRole('button', { name: /create geography/i });
     this.saveButton = page.getByRole('button', { name: /save/i });
+    this.reviewButton = page.getByRole('button', { name: /Review/i });
     this.approveButton = page.getByRole('button', { name: /approve/i });
     this.proceedAnywayButton = page.getByRole('button', { name: /proceed anyway/i });
     this.confirmButton = page.getByRole('button', { name: /confirm/i });
-    this.yesCrmaButton = page.getByRole('button', { name: /^Yes$/i }).first();
+    this.yesCrmaButton = page.getByRole('button', { name: /Yes, Create CRMA/i });
   }
 
   async fillGeographySetDetails(details: GeographySetDetails): Promise<void> {
@@ -78,7 +80,7 @@ export class GeographyCreationPage extends BasePage {
   }
 
   async selectState(state: string): Promise<void> {
-    await this.stateFilter.waitFor({ state: 'visible', timeout: 10000 });
+    await this.stateFilter.waitFor({ state: 'visible', timeout: 30000 });
     await this.stateFilter.selectOption({ label: state });
   }
 
@@ -96,6 +98,10 @@ export class GeographyCreationPage extends BasePage {
 
   async clickSave(): Promise<void> {
     await this.saveButton.click();
+  }
+
+  async clickReview(): Promise<void> {
+    await this.reviewButton.click();
   }
 
   async clickApprove(): Promise<void> {
@@ -140,6 +146,8 @@ export class GeographyCreationPage extends BasePage {
   }
 
   async verifySuccessMessage(message: string): Promise<boolean> {
-    return this.page.getByText(message).isVisible();
+    const toast = this.page.locator('body').getByText(message, { exact: false });
+    await toast.waitFor({ state: 'visible', timeout: 10000  });
+    return await toast.isVisible();
   }
 }

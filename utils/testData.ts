@@ -38,7 +38,7 @@ export const testData = {
       california: 'california'
     },
     versions: {
-      v39: '39.0 | 2025-10-27'
+      v50: '50.2 | 10/19/2021'
     },
     summaries: {
       test: 'testing'

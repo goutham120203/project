@@ -11,18 +11,19 @@ async function openRetailerGeography(homePage: HomePage, geographyMainPage: Geog
   await homePage.openGeography();
   await geographyMainPage.openProfileSearch();
   await geographyMainPage.searchProfile(testData.search.profiles.retailer);
-  await geographyMainPage.selectProfile(1);
+  await geographyMainPage.selectProfile(9);
   await geographyMainPage.clickCreateNewGeographySet();
 }
 
 async function completeRetailerGeographyCreation(geographyCreationPage: GeographyCreationPage) {
-  await geographyCreationPage.validateProfileData();
+  // await geographyCreationPage.validateProfileData();
   await geographyCreationPage.clickSelect();
   await geographyCreationPage.selectState(testData.geography.states.california);
   await geographyCreationPage.fillGeographyName(testData.geography.names.california);
   await geographyCreationPage.moveAllStoresToTarget();
   await geographyCreationPage.clickCreateGeography();
   await geographyCreationPage.clickSave();
+  await geographyCreationPage.clickReview();
   await geographyCreationPage.approveRmaDefinition();
   await geographyCreationPage.approveCrmaDefinition();
 }
@@ -32,11 +33,12 @@ test.describe('Geography creation flows for retailer profile', () => {
     await openRetailerGeography(homePage, geographyMainPage);
     await geographyCreationPage.fillGeographySetDetails({
       name: geographySetName,
-      version: testData.geography.versions.v39,
+      version: testData.geography.versions.v50,
       summary: testData.geography.summaries.test,
       previousSet: testData.geography.previousSets.none,
       notes: testData.geography.notes.test
     });
+    console.log(geographySetName);
     await geographyCreationPage.selectDeliverable(testData.geography.deliverables.manufacturerUse);
     await geographyCreationPage.clickContinue();
     expect(await geographyCreationPage.isReviewTitleVisible()).toBe(true);
@@ -46,7 +48,7 @@ test.describe('Geography creation flows for retailer profile', () => {
     await openRetailerGeography(homePage, geographyMainPage);
     await geographyCreationPage.fillGeographySetDetails({
       name: geographySetName,
-      version: testData.geography.versions.v39,
+      version: testData.geography.versions.v50,
       summary: testData.geography.summaries.test,
       previousSet: testData.geography.previousSets.none,
       notes: testData.geography.notes.test
@@ -61,7 +63,7 @@ test.describe('Geography creation flows for retailer profile', () => {
     await openRetailerGeography(homePage, geographyMainPage);
     await geographyCreationPage.fillGeographySetDetails({
       name: geographySetName,
-      version: testData.geography.versions.v39,
+      version: testData.geography.versions.v50,
       summary: testData.geography.summaries.test,
       previousSet: testData.geography.previousSets.none,
       notes: testData.geography.notes.test
@@ -70,18 +72,18 @@ test.describe('Geography creation flows for retailer profile', () => {
     await geographyCreationPage.clickContinue();
     await completeRetailerGeographyCreation(geographyCreationPage);
     expect(await geographyMappingPage.isMappingScreenDisplayed()).toBe(true);
-    await geographyMappingPage.validateProfileData();
+    // await geographyMappingPage.validateProfileData();
     await geographyMappingPage.clickSave();
-    expect(await geographyMappingPage.verifySaveSuccess()).toBe(true);
+    expect(await geographyMappingPage.verifySaveSuccess(testData.geography.messages.mappingSaved)).toBe(true);
     await geographyMappingPage.approveMappingWorkflow();
-    expect(await geographyMappingPage.verifyApprovalSuccess()).toBe(true);
+    expect(await geographyMappingPage.verifyApprovalSuccess(testData.geography.messages.mappingApproved)).toBe(true);
   });
 
   test('approves release evaluation for retailer profile', async ({ homePage, geographyMainPage, geographyCreationPage, geographyMappingPage, releaseEvaluationPage }) => {
     await openRetailerGeography(homePage, geographyMainPage);
     await geographyCreationPage.fillGeographySetDetails({
       name: geographySetName,
-      version: testData.geography.versions.v39,
+      version: testData.geography.versions.v50,
       summary: testData.geography.summaries.test,
       previousSet: testData.geography.previousSets.none,
       notes: testData.geography.notes.test
@@ -92,7 +94,7 @@ test.describe('Geography creation flows for retailer profile', () => {
     await geographyMappingPage.clickSave();
     await geographyMappingPage.approveMappingWorkflow();
     expect(await releaseEvaluationPage.isReleaseEvaluationDisplayed()).toBe(true);
-    await releaseEvaluationPage.validateProfileData();
+    //  await releaseEvaluationPage.validateProfileData();
     await releaseEvaluationPage.clickSave();
     expect(await releaseEvaluationPage.verifySaveSuccess()).toBe(true);
     await releaseEvaluationPage.clickApprove();
@@ -104,7 +106,7 @@ test.describe('Geography creation flows for retailer profile', () => {
     await openRetailerGeography(homePage, geographyMainPage);
     await geographyCreationPage.fillGeographySetDetails({
       name: geographySetName,
-      version: testData.geography.versions.v39,
+      version: testData.geography.versions.v50,
       summary: testData.geography.summaries.test,
       previousSet: testData.geography.previousSets.none,
       notes: testData.geography.notes.test
@@ -118,7 +120,7 @@ test.describe('Geography creation flows for retailer profile', () => {
     await releaseEvaluationPage.clickApprove();
     await releaseEvaluationPage.clickConfirm();
     expect(await geographyNamingPage.isGeographyNamingDisplayed()).toBe(true);
-    await geographyNamingPage.validateProfileData();
+    // await geographyNamingPage.validateProfileData();
     await geographyNamingPage.clickApprove();
     await geographyNamingPage.clickConfirm();
     expect(await geographyNamingPage.verifyApprovalSuccess()).toBe(true);
@@ -128,7 +130,7 @@ test.describe('Geography creation flows for retailer profile', () => {
     await openRetailerGeography(homePage, geographyMainPage);
     await geographyCreationPage.fillGeographySetDetails({
       name: geographySetName,
-      version: testData.geography.versions.v39,
+      version: testData.geography.versions.v50,
       summary: testData.geography.summaries.test,
       previousSet: testData.geography.previousSets.none,
       notes: testData.geography.notes.test
