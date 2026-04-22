@@ -1,3 +1,5 @@
+import { test } from '@playwright/test';
+
 export const testData = {
   // Client names for different profile types
   clients: {
@@ -156,10 +158,23 @@ export const testData = {
 };
 
 // Helper functions for generating dynamic test data
+let counter = 0;
+
+function uniqueId(): string {
+  counter++;
+
+  return `${Date.now()}-${process.pid}-${counter}-${Math.floor(Math.random() * 10000)}`;
+}
+
 export const generateTestData = {
-  clientVisibleName: (prefix: string = 'Test') => `${prefix} ${Date.now()}`,
-  geographyName: (prefix: string = 'Geo') => `${prefix} ${Date.now()}`,
-  notes: (content: string = 'Test notes') => `${content} - ${new Date().toISOString()}`
+  clientVisibleName: (prefix: string = 'Test') =>
+    `${prefix}-${uniqueId()}`,
+
+  geographyName: (prefix: string = 'Geo') =>
+    `${prefix}-${uniqueId()}`,
+
+  notes: (content: string = 'Test notes') =>
+    `${content}-${uniqueId()}`
 };
 
 // Type definitions for better TypeScript support

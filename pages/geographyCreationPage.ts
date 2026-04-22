@@ -76,6 +76,9 @@ export class GeographyCreationPage extends BasePage {
   }
 
   async clickSelect(): Promise<void> {
+
+    await this.selectButton.waitFor({ state: 'visible', timeout: 10000 });
+
     await this.selectButton.click();
   }
 
@@ -97,7 +100,7 @@ export class GeographyCreationPage extends BasePage {
   }
 
   async clickSave(): Promise<void> {
-    await this.saveButton.click();
+    await this.safeClick(this.saveButton);
   }
 
   async clickReview(): Promise<void> {
@@ -105,7 +108,7 @@ export class GeographyCreationPage extends BasePage {
   }
 
   async clickApprove(): Promise<void> {
-    await this.approveButton.click();
+    await this.safeClick(this.approveButton);
   }
 
   async clickProceedAnyway(): Promise<void> {
@@ -117,6 +120,7 @@ export class GeographyCreationPage extends BasePage {
   }
 
   async clickYesForCrma(): Promise<void> {
+    await this.yesCrmaButton.waitFor({ state: 'visible', timeout: 10000 });
     await this.yesCrmaButton.click();
   }
 
@@ -128,9 +132,15 @@ export class GeographyCreationPage extends BasePage {
 
   async approveCrmaDefinition(): Promise<void> {
     await this.clickYesForCrma();
-    await this.clickSave();
-    await this.clickApprove();
-    await this.clickConfirm();
+    await this.waitForLoaderToDisappear();
+    
+    const currentUrl = this.page.url();
+    console.log(`Current URL: ${currentUrl}`);
+    
+    // Try to wait for any save button visible
+    await this.safeClickAndWaitForLoader(this.saveButton);
+    await this.safeClickAndWaitForLoader(this.approveButton);
+    await this.safeClickAndWaitForLoader(this.confirmButton);
   }
 
   async isReviewTitleVisible(): Promise<boolean> {
@@ -147,7 +157,13 @@ export class GeographyCreationPage extends BasePage {
 
   async verifySuccessMessage(message: string): Promise<boolean> {
     const toast = this.page.locator('body').getByText(message, { exact: false });
-    await toast.waitFor({ state: 'visible', timeout: 10000  });
+    console.log(toast);
+    await toast.waitFor({ state: 'visible', timeout: 10000 });
     return await toast.isVisible();
   }
 }
+
+
+
+
+

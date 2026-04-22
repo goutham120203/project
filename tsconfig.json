@@ -11,7 +11,7 @@
     "isolatedModules": true,
     "noEmit": true,
     "allowSyntheticDefaultImports": true,
-    "types": ["@playwright/test"]
+    "types": ["@playwright/test","node"]
   },
   "include": ["tests/**/*.ts", "pages/**/*.ts", "fixtures/**/*.ts"],
   "exclude": ["node_modules"]

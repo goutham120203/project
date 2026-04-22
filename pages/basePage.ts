@@ -1,10 +1,16 @@
-import { Page } from '@playwright/test';
+import { expect, Locator, Page } from '@playwright/test';
 
 export class BasePage {
   readonly page: Page;
+  readonly dataTable;
+  readonly tableRows;
+  readonly refreshButton;
 
   constructor(page: Page) {
     this.page = page;
+    this.dataTable = page.locator('table.table');
+    this.tableRows = page.locator('table tbody tr');
+    this.refreshButton = page.getByRole('button', { name: /refresh/i });
   }
 
   async clickElement(selector: string): Promise<void> {
@@ -48,4 +54,80 @@ export class BasePage {
   async waitForStableState(timeout = 500): Promise<void> {
     await this.page.waitForTimeout(timeout);
   }
+
+  async waitForLoaderToDisappear(): Promise<void> {
+    const loader = this.page.getByText('Loading...');
+
+    try {
+      await loader.waitFor({
+        state: 'hidden',
+        timeout: 30000
+      });
+    } catch {
+      // Loader may not appear every time
+    }
+  }
+
+  async safeClick(locator: Locator): Promise<void> {
+    await this.waitForLoaderToDisappear();
+
+    const element = locator.first();
+
+    await expect(element).toBeVisible({
+      timeout: 15000
+    });
+
+    await expect(element).toBeEnabled({
+      timeout: 15000
+    });
+
+    await element.click();
+  }
+
+  async safeClickAndWaitForLoader(locator: Locator): Promise<void> {
+    await this.safeClick(locator);
+    await this.waitForLoaderToDisappear();
+  }
+
+  async waitForButtonReadyAndClick(locator: Locator): Promise<void> {
+    await this.waitForLoaderToDisappear();
+    await expect(locator).toBeVisible({ timeout: 15000 });
+    await expect(locator).toBeEnabled({ timeout: 15000 });
+    // Wait for element stability (stops animating/moving)
+    await this.page.waitForTimeout(300);
+    await locator.click({ force: true });
+  }
+
+  async waitForDataAndClickRefresh(): Promise<void> {
+    const maxRetries = 10;
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+
+      await this.waitForLoaderToDisappear();
+
+      const rowCount = await this.tableRows.count();
+
+      if (rowCount > 0) {
+        console.log(`Table loaded with ${rowCount} rows`);
+        return;
+      }
+
+      const refreshVisible = await this.refreshButton.isVisible().catch(() => false);
+
+      if (refreshVisible) {
+        console.log(`No data found. Clicking Refresh (${attempt})`);
+
+        await this.refreshButton.click();
+
+        await this.waitForLoaderToDisappear();
+      } else {
+        console.log(`Waiting for table... attempt ${attempt}`);
+        await this.page.waitForTimeout(2000);
+      }
+    }
+
+    throw new Error('Table data did not load after refresh attempts');
+  }
+
+
 }

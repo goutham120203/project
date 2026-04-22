@@ -45,8 +45,8 @@ export class GeographyMainPage extends BasePage {
   }
 
   async searchGeographySet(term: string): Promise<void> {
+    await this.geographySearchInput.waitFor({ state: 'visible', timeout: 10000 });
     await this.geographySearchInput.fill(term);
-    await this.page.waitForTimeout(500);
   }
 
   async selectGeographySetByName(name: string): Promise<void> {

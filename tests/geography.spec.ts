@@ -4,8 +4,6 @@ import { GeographyMainPage } from '../pages/geographyMainPage';
 import { HomePage } from '../pages/homePage';
 import { testData, generateTestData } from '../utils/testData';
 
-const geographySetName = generateTestData.geographyName('AutoGeo');
-
 async function openRetailerGeography(homePage: HomePage, geographyMainPage: GeographyMainPage) {
   await homePage.goto();
   await homePage.openGeography();
@@ -28,8 +26,11 @@ async function completeRetailerGeographyCreation(geographyCreationPage: Geograph
   await geographyCreationPage.approveCrmaDefinition();
 }
 
+test.setTimeout(60000);
+
 test.describe('Geography creation flows for retailer profile', () => {
   test('creates a new geography set with valid details for retailer profiles', async ({ homePage, geographyMainPage, geographyCreationPage }) => {
+    const geographySetName = generateTestData.geographyName('AutoGeo_Create');
     await openRetailerGeography(homePage, geographyMainPage);
     await geographyCreationPage.fillGeographySetDetails({
       name: geographySetName,
@@ -45,6 +46,7 @@ test.describe('Geography creation flows for retailer profile', () => {
   });
 
   test('completes geography creation with valid details for retailer profile', async ({ homePage, geographyMainPage, geographyCreationPage }) => {
+    const geographySetName = generateTestData.geographyName('AutoGeo_Complete');
     await openRetailerGeography(homePage, geographyMainPage);
     await geographyCreationPage.fillGeographySetDetails({
       name: geographySetName,
@@ -60,6 +62,7 @@ test.describe('Geography creation flows for retailer profile', () => {
   });
 
   test('approves geography mapping for retailer profiles', async ({ homePage, geographyMainPage, geographyCreationPage, geographyMappingPage }) => {
+    const geographySetName = generateTestData.geographyName('AutoGeo_Mapping');
     await openRetailerGeography(homePage, geographyMainPage);
     await geographyCreationPage.fillGeographySetDetails({
       name: geographySetName,
@@ -80,6 +83,7 @@ test.describe('Geography creation flows for retailer profile', () => {
   });
 
   test('approves release evaluation for retailer profile', async ({ homePage, geographyMainPage, geographyCreationPage, geographyMappingPage, releaseEvaluationPage }) => {
+    const geographySetName = generateTestData.geographyName('AutoGeo_Release');
     await openRetailerGeography(homePage, geographyMainPage);
     await geographyCreationPage.fillGeographySetDetails({
       name: geographySetName,
@@ -96,13 +100,14 @@ test.describe('Geography creation flows for retailer profile', () => {
     expect(await releaseEvaluationPage.isReleaseEvaluationDisplayed()).toBe(true);
     //  await releaseEvaluationPage.validateProfileData();
     await releaseEvaluationPage.clickSave();
-    expect(await releaseEvaluationPage.verifySaveSuccess()).toBe(true);
+    expect(await releaseEvaluationPage.verifySaveSuccess(testData.geography.messages.releaseSaved)).toBe(true);
     await releaseEvaluationPage.clickApprove();
     await releaseEvaluationPage.clickConfirm();
-    expect(await releaseEvaluationPage.verifyApprovalSuccess()).toBe(true);
+    expect(await releaseEvaluationPage.verifyApprovalSuccess(testData.geography.messages.releaseApproved)).toBe(true);
   });
 
   test('approves geography naming for retailer profile', async ({ homePage, geographyMainPage, geographyCreationPage, geographyMappingPage, releaseEvaluationPage, geographyNamingPage }) => {
+    const geographySetName = generateTestData.geographyName('AutoGeo_Naming');
     await openRetailerGeography(homePage, geographyMainPage);
     await geographyCreationPage.fillGeographySetDetails({
       name: geographySetName,
@@ -123,10 +128,11 @@ test.describe('Geography creation flows for retailer profile', () => {
     // await geographyNamingPage.validateProfileData();
     await geographyNamingPage.clickApprove();
     await geographyNamingPage.clickConfirm();
-    expect(await geographyNamingPage.verifyApprovalSuccess()).toBe(true);
+    expect(await geographyNamingPage.verifyApprovalSuccess(testData.geography.messages.namingApproved)).toBe(true);
   });
 
   test('final submit geography creation for retailer profile', async ({ homePage, geographyMainPage, geographyCreationPage, geographyMappingPage, releaseEvaluationPage, geographyNamingPage, finalReviewPage }) => {
+    const geographySetName = generateTestData.geographyName('AutoGeo_FinalSubmit');
     await openRetailerGeography(homePage, geographyMainPage);
     await geographyCreationPage.fillGeographySetDetails({
       name: geographySetName,
