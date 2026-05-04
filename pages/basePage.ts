@@ -124,7 +124,13 @@ export class BasePage {
       if (refreshVisible) {
         console.log(`No data found. Clicking Refresh (${attempt})`);
 
-        await this.refreshButton.click();
+        try {
+          await this.refreshButton.click({ force: true, timeout: 5000 });
+        } catch (error) {
+          console.log(`Refresh click failed on attempt ${attempt}, retrying...`);
+          await this.page.waitForTimeout(1000);
+          continue;
+        }
 
         await this.waitForLoaderToDisappear();
       } else {

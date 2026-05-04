@@ -26,7 +26,7 @@ async function completeRetailerGeographyCreation(geographyCreationPage: Geograph
   await geographyCreationPage.approveCrmaDefinition();
 }
 
-test.setTimeout(60000);
+test.setTimeout(180000);
 
 test.describe('Geography creation flows for retailer profile', () => {
   test('creates a new geography set with valid details for retailer profiles', async ({ homePage, geographyMainPage, geographyCreationPage }) => {

@@ -41,7 +41,7 @@ export class GeographyCreationPage extends BasePage {
     this.deliverableOption = page.getByText(/Available for Manufacturer Use/i);
     this.continueButton = page.getByRole('button', { name: /continue/i });
     this.selectButton = page.locator('xpath=//button[normalize-space()="Select"]').first();
-    this.stateFilter = page.locator('#state-filter');
+    this.stateFilter = page.getByRole('combobox', { name: /State/i });
     this.geographySetNameInput = page.getByPlaceholder('e.g. 2025 Bottlers');
     this.geographyNameInput = page.locator('#geoName');
     this.versionSelect = page.locator('select[formcontrolname="version"]');
@@ -106,12 +106,36 @@ export class GeographyCreationPage extends BasePage {
   }
 
   async clickSelect(): Promise<void> {
-    await this.selectButton.waitFor({ state: 'visible', timeout: 10000 });
-    await this.selectButton.click();
+    // Give the page time to stabilize after navigation
+    await this.page.waitForLoadState('domcontentloaded');
+    await this.page.waitForLoadState('networkidle').catch(() => {
+      // networkidle might not be necessary, continue anyway
+    });
+    await this.waitForLoaderToDisappear();
+    
+    // Wait a bit for any dynamic content to render
+    await this.page.waitForTimeout(500);
+    
+    // Look for the Select button
+    const selectButton = this.page.locator("//ol[@class='breadcrumb breadcrumb-arrows']//span[@class='ng-star-inserted'][normalize-space()='RMA Creation']//following::button[normalize-space()='Select']");
+    
+    // Wait for button to appear and be clickable
+    await expect(selectButton).toBeVisible({ timeout: 20000 });
+    await expect(selectButton).toBeEnabled({ timeout: 10000 });
+    
+    // Click it
+    await this.safeClick(selectButton);
   }
 
   async selectState(state: string): Promise<void> {
-    await this.stateFilter.waitFor({ state: 'visible', timeout: 30000 });
+    await this.waitForLoaderToDisappear();
+    const currentUrl = this.page.url();
+    console.log(`Current URL before selectState: ${currentUrl}`);
+    
+    // Wait for the state combobox to be visible
+    await expect(this.stateFilter).toBeVisible({ timeout: 30000 });
+    
+    // Select the state option
     await this.stateFilter.selectOption({ label: state });
   }
 
