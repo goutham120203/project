@@ -18,3 +18,12 @@ Thumbs.db
 
 # Temporary files
 *.tmp
+
+# Node / Playwright
+node_modules/
+package-lock.json
+yarn.lock
+.npm/
+.playwright/
+playwright-report/
+ test-results/

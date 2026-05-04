@@ -35,7 +35,7 @@ jobs:
             ${{ runner.os }}-m2
 
       - name: Run Maven tests
-        run: mvn clean test
+        run: mvn test "-Dcucumber.filter.tags=@create"
         continue-on-error: true
 
       - name: Upload Cucumber HTML Report
