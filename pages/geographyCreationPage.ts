@@ -7,8 +7,13 @@ export interface GeographySetDetails {
   summary: string;
   previousSet: string;
   notes: string;
+
+  flowType?: 'custom' | 'ccc';
+
+  // CCC
   customRegionConnection?: string;
   cccPreviousGeographySet?: string;
+  cccChainType?: string;
 }
 
 export class GeographyCreationPage extends BasePage {
@@ -32,15 +37,19 @@ export class GeographyCreationPage extends BasePage {
   readonly proceedAnywayButton: Locator;
   readonly confirmButton: Locator;
   readonly yesCrmaButton: Locator;
+  readonly geographyTypeInput: Locator;
   readonly geographyTypeModal: Locator;
   readonly geographyMethodModal: Locator;
   readonly dialogContainer: Locator;
+  readonly outlets:  Locator;
+  readonly cccSumOfchainsYes: Locator;
+  readonly cccSumOfchainsNo: Locator;
 
   constructor(page: Page) {
     super(page);
     this.deliverableOption = page.getByText(/Available for Manufacturer Use/i);
     this.continueButton = page.getByRole('button', { name: /continue/i });
-    this.selectButton = page.locator('xpath=//button[normalize-space()="Select"]').first();
+    this.selectButton = page.getByText('Select', { exact: true }).first();
     this.stateFilter = page.getByRole('combobox', { name: /State/i });
     this.geographySetNameInput = page.getByPlaceholder('e.g. 2025 Bottlers');
     this.geographyNameInput = page.locator('#geoName');
@@ -58,22 +67,26 @@ export class GeographyCreationPage extends BasePage {
     this.proceedAnywayButton = page.getByRole('button', { name: /proceed anyway/i });
     this.confirmButton = page.getByRole('button', { name: /confirm/i });
     this.yesCrmaButton = page.getByRole('button', { name: /Yes, Create CRMA/i });
-    this.dialogContainer = page.locator('div[role="dialog"], .modal-dialog, .modal-content, section[role="dialog"]');
+    this.geographyTypeInput = page.locator('#geographyType');
+    this.dialogContainer = page.locator('div[role="dialog"], .modal-dialog, .modal-content, section[role="dialog"], div.geography-type-selector-modal');
     this.geographyTypeModal = this.dialogContainer.filter({ hasText: /Select Geography Type/i }).first();
     this.geographyMethodModal = this.dialogContainer.filter({ hasText: /Select Geography Creation Method/i }).first();
+    this.outlets = page.getByRole('switch');
+    this.cccSumOfchainsYes =  page.locator('#sum_yes_1');
+    this.cccSumOfchainsNo = page.locator("#sum_no_1");
   }
 
   async fillGeographySetDetails(details: GeographySetDetails): Promise<void> {
     await this.geographySetNameInput.fill(details.name);
     await this.selectVersion(details.version);
     await this.summaryInput.fill(details.summary);
-    if (details.customRegionConnection) {
-      await this.selectCustomRegionConnection(details.customRegionConnection);
+    if (details.flowType === 'ccc') {
+      await this.selectCustomRegionConnection(details.customRegionConnection ?? details.previousSet);
+      await this.selectCccPreviousGeographySet(details.cccPreviousGeographySet ?? details.previousSet);
+    } else {
+      await this.selectPreviousGeographySet(details.previousSet);
     }
-    if (details.cccPreviousGeographySet) {
-      await this.selectCccPreviousGeographySet(details.cccPreviousGeographySet);
-    }
-    await this.selectPreviousGeographySet(details.previousSet);
+    
     await this.notesInput.fill(details.notes);
   }
 
@@ -101,6 +114,13 @@ export class GeographyCreationPage extends BasePage {
     await this.page.getByText(option).click();
   }
 
+  async selectfirstOutlet(details: GeographySetDetails): Promise<void>{
+    await this.outlets.first().click();
+    if (details.flowType === 'ccc'){
+      await this.cccSumOfchainsYes.click();
+    }
+  }
+
   async clickContinue(): Promise<void> {
     await this.safeClickAndWaitForLoader(this.continueButton);
   }
@@ -116,13 +136,12 @@ export class GeographyCreationPage extends BasePage {
     // Wait a bit for any dynamic content to render
     await this.page.waitForTimeout(500);
     
-    // Look for the Select button
-    const selectButton = this.page.locator("//ol[@class='breadcrumb breadcrumb-arrows']//span[@class='ng-star-inserted'][normalize-space()='RMA Creation']//following::button[normalize-space()='Select']");
-    
+    const selectButton = this.selectButton;
+
     // Wait for button to appear and be clickable
     await expect(selectButton).toBeVisible({ timeout: 20000 });
     await expect(selectButton).toBeEnabled({ timeout: 10000 });
-    
+
     // Click it
     await this.safeClick(selectButton);
   }
@@ -211,21 +230,68 @@ export class GeographyCreationPage extends BasePage {
       return false;
     }
 
-    const option = dialog.getByText(type, { exact: false }).first();
+    const option = await this.getGeographyTypeOption(dialog, type);
     await expect(option).toBeVisible({ timeout: 15000 });
     await option.click();
+    await dialog.waitFor({ state: 'hidden', timeout: 5000 });
     return true;
   }
 
+  private async getGeographyTypeOption(dialog: Locator, type: string): Promise<Locator> {
+    const normalizedType = type.trim();
+    const matchers: Array<string | RegExp> = [normalizedType];
+
+    if (/ccc/i.test(normalizedType)) {
+      matchers.push(/Custom Census Chain|CCC/i);
+    }
+
+    if (/Custom Region/i.test(normalizedType) === false) {
+      matchers.push(/Custom Region/i);
+    }
+
+    for (const matcher of matchers) {
+      const byText = dialog.getByText(matcher, { exact: typeof matcher === 'string' });
+      if (await byText.count().then(count => count > 0) && await byText.isVisible().catch(() => false)) {
+        return byText.first();
+      }
+
+      const byRoleButton = dialog.getByRole('button', { name: matcher, exact: typeof matcher === 'string' }).first();
+      if (await byRoleButton.count().then(count => count > 0) && await byRoleButton.isVisible().catch(() => false)) {
+        return byRoleButton;
+      }
+
+      const byDiv = dialog.locator('div').filter({ hasText: matcher }).first();
+      if (await byDiv.isVisible().catch(() => false)) {
+        return byDiv;
+      }
+    }
+
+    return dialog.locator('div').filter({ hasText: normalizedType }).first();
+  }
+
   async chooseCreationMethod(method: string): Promise<boolean> {
-    const dialog = await this.findDialogByTitle(/Select Geography Creation Method/i, 3000);
+    const dialog = await this.findDialogByTitle(/Select Geography Creation Method/i, 5000);
     if (!dialog) {
+      console.log(`[chooseCreationMethod] creation method dialog not displayed`);
       return false;
     }
 
-    const option = dialog.getByText(method, { exact: false }).first();
+    console.log(`[chooseCreationMethod] selecting creation method: ${method}`);
+    const option = dialog.getByText(method, { exact: true }).first();
     await expect(option).toBeVisible({ timeout: 15000 });
+    await expect(option).toBeEnabled({ timeout: 15000 }).catch(() => {
+      console.log(`[chooseCreationMethod] option visible but not enabled: ${method}`);
+    });
     await option.click();
+    await this.waitForLoaderToDisappear();
+
+    try {
+      await expect(dialog).toBeHidden({ timeout: 10000 });
+      console.log('[chooseCreationMethod] creation method dialog closed successfully');
+    } catch {
+      console.log('[chooseCreationMethod] creation method dialog did not hide in time');
+    }
+
     return true;
   }
 
@@ -236,65 +302,112 @@ export class GeographyCreationPage extends BasePage {
     }
 
     if (preferredType) {
-      const preferredOption = dialog.getByText(preferredType, { exact: false }).first();
+      const preferredOption = await this.getGeographyTypeOption(dialog, preferredType);
       if (await preferredOption.isVisible().catch(() => false)) {
         await preferredOption.click();
+        await dialog.waitFor({ state: 'hidden', timeout: 5000 });
         return preferredType as 'Custom Region' | 'Custom Census Chain (CCC)';
+      }
+
+      if (/ccc/i.test(preferredType)) {
+        const cccOption = dialog.locator('div').filter({ hasText: /Custom Census Chain|CCC/i }).first();
+        if (await cccOption.isVisible().catch(() => false)) {
+          await cccOption.click();
+          await dialog.waitFor({ state: 'hidden', timeout: 5000 });
+          return 'Custom Census Chain (CCC)';
+        }
       }
     }
 
-    const customRegionOption = dialog.getByText(/Custom Region/i).first();
-    if (await customRegionOption.isVisible().catch(() => false)) {
-      await customRegionOption.click();
-      return 'Custom Region';
-    }
-
-    const cccOption = dialog.getByText(/Custom Census Chain|CCC/i).first();
+    const cccOption = dialog.locator('div').filter({ hasText: /Custom Census Chain|CCC/i }).first();
     if (await cccOption.isVisible().catch(() => false)) {
       await cccOption.click();
+      await dialog.waitFor({ state: 'hidden', timeout: 5000 });
       return 'Custom Census Chain (CCC)';
+    }
+
+    const customRegionOption = dialog.locator('div').filter({ hasText: /Custom Region/i }).first();
+    if (await customRegionOption.isVisible().catch(() => false)) {
+      await customRegionOption.click();
+      await dialog.waitFor({ state: 'hidden', timeout: 5000 });
+      return 'Custom Region';
     }
 
     return 'Unknown';
   }
 
-  async chooseAvailableCreationMethod(preferredMethod?: string): Promise<'FIPS Code' | 'ZIP Code' | 'Unknown'> {
-    const dialog = await this.findDialogByTitle(/Select Geography Creation Method/i, 3000);
+  async chooseGeographyTypeIfVisible(preferredType?: string): Promise<boolean> {
+    const selectedType = await this.chooseAvailableGeographyType(preferredType);
+    return selectedType !== 'Unknown';
+  }
+
+  async chooseAvailableCreationMethod(preferredMethod?: 'FIPS Code' | 'ZIP Code'): Promise<'FIPS Code' | 'ZIP Code' | 'Unknown'> {
+    const dialog = await this.findDialogByTitle(/Select Geography Creation Method/i, 5000);
     if (!dialog) {
+      console.log('[chooseAvailableCreationMethod] creation method dialog not displayed');
       return 'Unknown';
     }
 
+    const clickOption = async (label: 'FIPS Code' | 'ZIP Code'): Promise<boolean> => {
+      const option = dialog.getByText(label, { exact: true }).first();
+      if (!(await option.isVisible().catch(() => false))) {
+        return false;
+      }
+
+      console.log(`[chooseAvailableCreationMethod] selecting available method: ${label}`);
+      await option.click();
+      await this.waitForLoaderToDisappear();
+
+      try {
+        await expect(dialog).toBeHidden({ timeout: 10000 });
+        console.log('[chooseAvailableCreationMethod] creation method dialog closed successfully');
+      } catch {
+        console.log('[chooseAvailableCreationMethod] creation method dialog did not hide in time');
+      }
+
+      return true;
+    };
+
     if (preferredMethod) {
-      const preferredOption = dialog.getByText(preferredMethod, { exact: false }).first();
-      if (await preferredOption.isVisible().catch(() => false)) {
-        await preferredOption.click();
+      if (await clickOption(preferredMethod)) {
         return preferredMethod as 'FIPS Code' | 'ZIP Code';
       }
     }
 
-    const fipsOption = dialog.getByText(/FIPS Code/i).first();
-    if (await fipsOption.isVisible().catch(() => false)) {
-      await fipsOption.click();
+    if (await clickOption('FIPS Code')) {
       return 'FIPS Code';
     }
 
-    const zipOption = dialog.getByText(/ZIP Code/i).first();
-    if (await zipOption.isVisible().catch(() => false)) {
-      await zipOption.click();
+    if (await clickOption('ZIP Code')) {
       return 'ZIP Code';
     }
 
+    console.log('[chooseAvailableCreationMethod] no creation method option found');
     return 'Unknown';
   }
 
   async findDialogByTitle(title: RegExp, timeout = 5000): Promise<Locator | null> {
-    const dialog = this.dialogContainer.filter({ hasText: title }).first();
+    const heading = this.page.getByRole('heading', { name: title }).first();
     try {
-      await dialog.waitFor({ state: 'visible', timeout });
-      return dialog;
+      await heading.waitFor({ state: 'visible', timeout });
     } catch {
       return null;
     }
+
+    const dialog = heading.locator(
+      'xpath=ancestor::div[.//button[normalize-space(.)="Close"] or .//button[normalize-space(.)="Cancel"] or .//button[normalize-space(.)="Continue"] or .//button[normalize-space(.)="Confirm"] or .//button[normalize-space(.)="Save"]][1]'
+    );
+
+    if (await dialog.count()) {
+      return dialog.first();
+    }
+
+    const sectionDialog = heading.locator('xpath=ancestor::section[1]');
+    if (await sectionDialog.count()) {
+      return sectionDialog.first();
+    }
+
+    return heading.locator('xpath=ancestor::div[1]');
   }
 
   async getDialogByTitle(title: RegExp, timeout = 15000): Promise<Locator> {
@@ -334,6 +447,11 @@ export class GeographyCreationPage extends BasePage {
   async waitForCreationForm(): Promise<void> {
     await expect(this.geographySetNameInput).toBeVisible({ timeout: 15000 });
     await this.waitForLoaderToDisappear();
+  }
+
+  async getSelectedGeographyType(): Promise<string> {
+    await expect(this.geographyTypeInput).toBeVisible({ timeout: 15000 });
+    return this.geographyTypeInput.inputValue();
   }
 
   async isMappingStageVisible(): Promise<boolean> {

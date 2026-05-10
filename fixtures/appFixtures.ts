@@ -3,6 +3,7 @@ import { HomePage } from '../pages/homePage';
 import { ManageProfilesPage } from '../pages/manageProfilesPage';
 import { ManufacturerPage } from '../pages/manufacturerPage';
 import { RetailerPage } from '../pages/retailerPage';
+import { CircanaPage } from '../pages/circanaPage';
 import { GeographyMainPage } from '../pages/geographyMainPage';
 import { GeographyCreationPage } from '../pages/geographyCreationPage';
 import { GeographyMappingPage } from '../pages/geographyMappingPage';
@@ -14,6 +15,7 @@ type AppFixtures = {
   homePage: HomePage;
   manageProfilesPage: ManageProfilesPage;
   manufacturerPage: ManufacturerPage;
+  circanaPage: CircanaPage;
   retailerPage: RetailerPage;
   geographyMainPage: GeographyMainPage;
   geographyCreationPage: GeographyCreationPage;
@@ -32,6 +34,9 @@ export const test = baseTest.extend<AppFixtures>({
   },
   manufacturerPage: async ({ page }, use) => {
     await use(new ManufacturerPage(page));
+  },
+  circanaPage: async ({page}, use) => {
+    await use(new CircanaPage(page));
   },
   retailerPage: async ({ page }, use) => {
     await use(new RetailerPage(page));

@@ -52,6 +52,7 @@ export class GeographyMainPage extends BasePage {
 
   async selectFirstProfile(): Promise<void> {
     const firstProfile = this.page.locator('//*[@id="profileSelect_list"]/p-selectitem/li').first();
+    // const firstProfile = this.page.locator('//*[@id="profileSelect_list"]/p-selectitem/li').nth(2);
     await expect(firstProfile).toBeVisible({ timeout: 15000 });
     await firstProfile.click();
   }

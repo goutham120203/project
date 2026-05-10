@@ -8,10 +8,11 @@ import {
   openManufacturerGeography,
   setupManufacturerFlow,
   completeManufacturerGeographyCreation,
-  completeManufacturerApprovalFlow
+  completeCustomManufacturerApprovalFlow,
+  completeCCCManufacturerApprovalFlow
 } from '../utils/manufacturerGeographyFlow';
 
-test.setTimeout(60000);
+test.setTimeout(180000);
 
 const manufacturerProfileName = testData.clients.manufacturer.valid;
 
@@ -32,31 +33,82 @@ function buildManufacturerOptions(overrides: Partial<ManufacturerGeographyOption
 
   const result = { ...defaults, ...overrides };
 
-  if (result.flowType === 'AUTO') {
-    delete result.geographyType;
-    delete result.creationMethod;
+  if (result.flowType === 'custom') {
+    result.geographyType = 'Custom Region';
+  }
+
+  if (result.flowType === 'ccc') {
+    result.geographyType = 'Custom Census Chain (CCC)';
   }
 
   return result;
 }
 
 test.describe('Manufacturer geography flow', () => {
-  test('Complete manufacture flow', async ({ homePage, geographyMainPage, geographyCreationPage, geographyMappingPage, releaseEvaluationPage, geographyNamingPage, finalReviewPage }) => {
+    test('Complete custom flow with fips', async ({ homePage, geographyMainPage, geographyCreationPage, geographyMappingPage, releaseEvaluationPage, geographyNamingPage, finalReviewPage }) => {
     const options = buildManufacturerOptions({
-      flowType: 'AUTO',
+      flowType: 'custom',
       name: generateTestData.geographyName('ManufacturerSet'),
-      geographyName: generateTestData.geographyName('ManufacturerGeo')
+      geographyName: generateTestData.geographyName('ManufacturerGeo'),
+      creationMethod: 'FIPS Code'
     });
 
-    await openManufacturerGeography(homePage, geographyMainPage);
+    await openManufacturerGeography(homePage, geographyMainPage, "manufacture def testing");
     const result = await setupManufacturerFlow(geographyCreationPage, options);
     expect(result.actualGeographyType).not.toBe('Unknown');
     expect(result.actualCreationMethod).not.toBe('Unknown');
 
-    await completeManufacturerGeographyCreation(geographyCreationPage, options.state, options.geographyName);
-    expect(await geographyCreationPage.verifySuccessMessage(testData.geography.messages.crmaApproved)).toBe(true);
+    await completeManufacturerGeographyCreation(geographyCreationPage, options);
+    expect(await geographyCreationPage.verifySuccessMessage(testData.geography.messages.GeographyApproved)).toBe(true);
 
-    await completeManufacturerApprovalFlow(
+    await completeCustomManufacturerApprovalFlow(
+      geographyMappingPage,
+      releaseEvaluationPage,
+      geographyNamingPage,
+      finalReviewPage
+    );
+  });
+  
+  // test('Complete custom flow with zips', async ({ homePage, geographyMainPage, geographyCreationPage, geographyMappingPage, releaseEvaluationPage, geographyNamingPage, finalReviewPage }) => {
+  //   const options = buildManufacturerOptions({
+  //     flowType: 'custom',
+  //     name: generateTestData.geographyName('ManufacturerSet'),
+  //     geographyName: generateTestData.geographyName('ManufacturerGeo'),
+  //     creationMethod:'ZIP Code'
+  //   });
+
+  //   await openManufacturerGeography(homePage, geographyMainPage, "manufacturer");
+  //   const result = await setupManufacturerFlow(geographyCreationPage, options);
+  //   expect(result.actualGeographyType).not.toBe('Unknown');
+  //   expect(result.actualCreationMethod).not.toBe('Unknown');
+
+  //   await completeManufacturerGeographyCreation(geographyCreationPage, options);
+  //   expect(await geographyCreationPage.verifySuccessMessage(testData.geography.messages.crmaApproved)).toBe(true);
+
+  //   await completeManufacturerApprovalFlow(
+  //     geographyMappingPage,
+  //     releaseEvaluationPage,
+  //     geographyNamingPage,
+  //     finalReviewPage
+  //   );
+  // });
+
+  test('Complete ccc flow', async ({ homePage, geographyMainPage, geographyCreationPage, geographyMappingPage, releaseEvaluationPage, geographyNamingPage, finalReviewPage }) => {
+    const options = buildManufacturerOptions({
+      flowType: 'ccc',
+      name: generateTestData.geographyName('ManufacturerSet'),
+      geographyName: generateTestData.geographyName('ManufacturerGeo')
+    });
+
+    await openManufacturerGeography(homePage, geographyMainPage, "manufacturer");
+    const result = await setupManufacturerFlow(geographyCreationPage, options);
+    expect(result.actualGeographyType).not.toBe('Unknown');
+    expect(result.actualCreationMethod).not.toBe('Unknown');
+
+    await completeManufacturerGeographyCreation(geographyCreationPage, options);
+    expect(await geographyCreationPage.verifySuccessMessage(testData.geography.messages.GeographyApproved)).toBe(true);
+
+    await completeCCCManufacturerApprovalFlow(
       geographyMappingPage,
       releaseEvaluationPage,
       geographyNamingPage,

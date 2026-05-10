@@ -11,6 +11,7 @@ export class FinalReviewPage extends BasePage {
   readonly ApproveParentage;
   readonly ApproveReleaseResults;
   readonly ApproveChangeHighlights;
+  readonly finalReviewScreens;
 
   readonly finalSubmitButton;
   readonly finalConfirmButton;
@@ -30,28 +31,79 @@ export class FinalReviewPage extends BasePage {
     this.finalSubmitButton = page.getByRole('button', { name: /final submit/i });
     this.finalConfirmButton = page.getByRole('button', { name: /submit final/i });
     this.reportHeader = page.getByRole('heading', { name: 'Final Reports' });
+    this.finalReviewScreens = page.locator('li.nav-item.pe-2.ng-star-inserted');
   }
 
   // Not Dynamic for other profiles
   async clickReviewAndApproveAll(): Promise<void> {
-    await this.waitForLoaderToDisappear();
-    await this.ApproverrmaDefinitionReview.click();
-    await this.waitForLoaderToDisappear();
-    await this.ApproveCRMADefinitionReview.click();
-    await this.waitForLoaderToDisappear();
-    await this.ApproveRMACRMACompare.click();
-    await this.waitForLoaderToDisappear();
-    await this.ApproveGeographyHierarchy.click();
-    await this.waitForLoaderToDisappear();
-    await this.ApproveGeographyMapping.click();
-    await this.waitForLoaderToDisappear();
-    await this.ApproveGeographyNaming.click();
-    await this.waitForLoaderToDisappear();
-    await this.ApproveParentage.click();
-    await this.waitForLoaderToDisappear();
-    await this.ApproveReleaseResults.click();
-    await this.waitForLoaderToDisappear();
-    await this.ApproveChangeHighlights.click();
+    
+  //await this.waitForLoaderToDisappear();
+
+  // const screensCount = await this.finalReviewScreens.count();
+  
+  // console.log(`total screen in final review ${screensCount} `);
+  // for (let i = 0; i < screensCount; i++) {
+
+  //   await this.waitForLoaderToDisappear();
+
+  //   const checkbox = this.page.getByRole('checkbox').first();
+
+  //   await checkbox.waitFor({
+  //     state: 'visible',
+  //     timeout: 10000
+  //   });
+
+  //   if (!(await checkbox.isChecked())) {
+  //     await checkbox.check();
+  //   }
+
+    // after checking, app auto navigates to next screen
+  //  await this.waitForLoaderToDisappear();
+  //}
+
+    let maxIterations = 20;
+    let iteration = 0;
+
+    while (!(await this.finalSubmitButton.isEnabled()) && iteration < maxIterations){
+      await this.waitForLoaderToDisappear();
+
+      const checkbox = this.page.getByRole('checkbox').first();
+      await expect(checkbox).toBeVisible({ timeout: 15000 });
+      
+      console.log( `Approving review screen ${iteration + 1}`);
+
+      await checkbox.check();
+
+       await this.waitForLoaderToDisappear();
+       await this.page.waitForTimeout(1000);
+       iteration++;
+
+      console.log(
+        `Final Submit enabled: ${await this.finalSubmitButton.isEnabled()
+        }`
+      );
+    }
+
+    await expect(this.finalSubmitButton).toBeEnabled({timeout: 15000});
+
+    // await this.waitForLoaderToDisappear();
+    // await this.ApproverrmaDefinitionReview.click();
+    // await this.waitForLoaderToDisappear();
+    // await this.ApproveCRMADefinitionReview.click();
+    // await this.waitForLoaderToDisappear();
+    // await this.ApproveRMACRMACompare.click();
+    // await this.waitForLoaderToDisappear();
+    // await this.ApproveGeographyHierarchy.click();
+    // await this.waitForLoaderToDisappear();
+    // await this.ApproveGeographyMapping.click();
+    // await this.waitForLoaderToDisappear();
+    // await this.ApproveGeographyNaming.click();
+    // await this.waitForLoaderToDisappear();
+    // await this.ApproveParentage.click();
+    // await this.waitForLoaderToDisappear();
+    // await this.ApproveReleaseResults.click();
+    // await this.waitForLoaderToDisappear();
+    // await this.ApproveChangeHighlights.click();
   }
 
   async clickFinalSubmit(): Promise<void> {

@@ -1,6 +1,7 @@
 import { Locator, Page } from '@playwright/test';
+import { BasePage } from './basePage';
 
-export class ManageProfilesPage {
+export class ManageProfilesPage extends BasePage{
   readonly page: Page;
   readonly heading: Locator;
   readonly searchField: Locator;
@@ -14,12 +15,13 @@ export class ManageProfilesPage {
   readonly updateProfileButton: Locator;
 
   constructor(page: Page) {
+    super(page);
     this.page = page;
     this.heading = page.locator('h2:has-text("Profiles")');
     this.searchField = page.locator('input[placeholder*="Search"]');
-    this.profileCards = page.locator('.profile-card, .card');
+    this.profileCards = page.locator('div.card.profile-card.h-100.shadow-sm.p-2.rounded-4.clickable-card');
     this.allProfilesDropdown = page.getByText(/all profiles/i);
-    this.deleteButton = page.getByRole('button', { name: /delete/i });
+    this.deleteButton = page.locator('button.btn.btn-danger.btn-sm.text-xs.rounded-3:visible');
     this.cancelButton = page.getByRole('button', { name: /cancel/i });
     this.editButton = page.getByRole('button', { name: /edit/i });
     this.clientVisibleNameField = page.locator('#clientVisibleName');
@@ -51,9 +53,12 @@ export class ManageProfilesPage {
 
   async deleteFirstProfile(): Promise<void> {
     await this.deleteButton.first().click();
-    const confirmButton = this.page.locator('button:has-text("Confirm")');
+
+    await this.waitForLoaderToDisappear();
+    const confirmButton = this.page.locator('div.modal-footer.border-0').locator('button').nth(1);
     if (await confirmButton.count()) {
       await confirmButton.click();
+    await this.waitForLoaderToDisappear();
     }
   }
 

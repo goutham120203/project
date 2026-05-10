@@ -8,7 +8,7 @@ import { GeographyNamingPage } from '../pages/geographyNamingPage';
 import { FinalReviewPage } from '../pages/finalReviewPage';
 import { testData } from '../utils/testData';
 
-export type ManufacturerFlowType = 'A' | 'B' | 'C' | 'AUTO';
+export type ManufacturerFlowType = 'custom' | 'ccc';
 
 export interface ManufacturerGeographyOptions extends GeographySetDetails {
   profileName: string;
@@ -39,6 +39,7 @@ export async function openManufacturerGeography(
     await geographyMainPage.searchProfile(profileName);
     await geographyMainPage.selectProfileByName(profileName);
   } else {
+    await geographyMainPage.searchProfile('manufacture');
     await geographyMainPage.selectFirstProfile();
   }
 
@@ -53,42 +54,57 @@ export async function setupManufacturerFlow(
   let actualCreationMethod: ManufacturerFlowResult['actualCreationMethod'] = 'Unknown';
   let popupHandled = false;
 
-  const preferredGeographyType = options.geographyType;
-  const preferredCreationMethod = options.creationMethod;
+  const preferredGeographyType =
+    options.flowType === 'custom'
+      ? 'Custom Region'
+      : 'Custom Census Chain (CCC)';
+  
 
   const typeDialog = await geographyCreationPage.findDialogByTitle(/Select Geography Type/i, 3000);
   if (typeDialog) {
     popupHandled = true;
-    if (preferredGeographyType) {
-      const selected = await geographyCreationPage.chooseGeographyType(preferredGeographyType);
-      actualGeographyType = selected ? preferredGeographyType : await geographyCreationPage.chooseAvailableGeographyType(preferredGeographyType);
+    const selected =
+      await geographyCreationPage.chooseGeographyType(
+        preferredGeographyType
+      );
+
+     actualGeographyType = selected
+      ? preferredGeographyType
+      : await geographyCreationPage.chooseAvailableGeographyType();
+
     } else {
-      actualGeographyType = await geographyCreationPage.chooseAvailableGeographyType();
+      actualGeographyType = preferredGeographyType;
     }
-  } else {
-    actualGeographyType = preferredGeographyType ?? 'Custom Region';
+
+
+
+  await geographyCreationPage.waitForCreationForm();
+  const pageGeographyType = await geographyCreationPage.getSelectedGeographyType().catch(() => 'Unknown');
+  if (pageGeographyType === 'Custom Region' || pageGeographyType === 'Custom Census Chain (CCC)') {
+    actualGeographyType = pageGeographyType;
   }
+  
+  await geographyCreationPage.fillGeographySetDetails(options);
+  await geographyCreationPage.selectfirstOutlet(options);
+  await geographyCreationPage.clickContinue();
+
+
 
   const methodDialog = await geographyCreationPage.findDialogByTitle(/Select Geography Creation Method/i, 3000);
   if (methodDialog) {
     popupHandled = true;
-    if (preferredCreationMethod) {
-      const selected = await geographyCreationPage.chooseCreationMethod(preferredCreationMethod);
-      actualCreationMethod = selected ? preferredCreationMethod : await geographyCreationPage.chooseAvailableCreationMethod(preferredCreationMethod);
-    } else {
-      actualCreationMethod = await geographyCreationPage.chooseAvailableCreationMethod();
-    }
+
+    const preferredCreationMethod = options.creationMethod === 'ZIP Code' ? 'ZIP Code' : 'FIPS Code';
+    const selected = await geographyCreationPage.chooseCreationMethod(preferredCreationMethod);
+
+    actualCreationMethod = selected
+      ? preferredCreationMethod
+      : await geographyCreationPage.chooseAvailableCreationMethod();
   } else {
-    actualCreationMethod = preferredCreationMethod ?? 'FIPS Code';
+    // No creation method dialog appeared; continue with the provided selection if available.
+    actualCreationMethod = options.creationMethod ?? 'Unknown';
+    console.log(`[setupManufacturerFlow] no creation method popup detected, using fallback: ${actualCreationMethod}`);
   }
-
-  await geographyCreationPage.waitForCreationForm();
-  await geographyCreationPage.fillGeographySetDetails(options);
-  await geographyCreationPage.selectDeliverable(options.deliverable);
-  await geographyCreationPage.clickContinue();
-
-  const confirmationPopupHandled = await geographyCreationPage.handlePopupAction('Continue', /ZIP Code|ZIP|FIPS Code|FIPS|Custom Census Chain|CCC|Confirmation/i);
-  popupHandled = popupHandled || confirmationPopupHandled;
 
   return {
     popupHandled,
@@ -97,7 +113,7 @@ export async function setupManufacturerFlow(
   };
 }
 
-export async function completeManufacturerApprovalFlow(
+export async function completeCustomManufacturerApprovalFlow(
   geographyMappingPage: GeographyMappingPage,
   releaseEvaluationPage: ReleaseEvaluationPage,
   geographyNamingPage: GeographyNamingPage,
@@ -124,16 +140,60 @@ export async function completeManufacturerApprovalFlow(
   expect(await finalReviewPage.isFinalReportVisible()).toBe(true);
 }
 
+export async function completeCCCManufacturerApprovalFlow(
+  geographyMappingPage: GeographyMappingPage,
+  releaseEvaluationPage: ReleaseEvaluationPage,
+  geographyNamingPage: GeographyNamingPage,
+  finalReviewPage: FinalReviewPage
+): Promise<void> {
+  
+  await releaseEvaluationPage.clickSave();
+  expect(await releaseEvaluationPage.verifySaveSuccess(testData.geography.messages.releaseSaved)).toBe(true);
+  await releaseEvaluationPage.clickApprove();
+  await releaseEvaluationPage.clickConfirm();
+  expect(await releaseEvaluationPage.verifyApprovalSuccess(testData.geography.messages.releaseApproveCCC)).toBe(true);
+
+  await geographyMappingPage.clickSave();
+  expect(await geographyMappingPage.verifySaveSuccess(testData.geography.messages.mappingSaved)).toBe(true);
+  await geographyMappingPage.approveMappingWorkflow();
+  expect(await geographyMappingPage.verifyApprovalSuccess(testData.geography.messages.mappingApproved)).toBe(true);
+
+  await geographyNamingPage.clickApprove();
+  await geographyNamingPage.clickConfirm();
+  expect(await geographyNamingPage.verifyApprovalSuccess(testData.geography.messages.namingApproved)).toBe(true);
+
+  await finalReviewPage.clickReviewAndApproveAll();
+  await finalReviewPage.clickFinalSubmit();
+  await finalReviewPage.confirmFinalSubmission();
+  expect(await finalReviewPage.isFinalReportVisible()).toBe(true);
+}
+
 export async function completeManufacturerGeographyCreation(
   geographyCreationPage: GeographyCreationPage,
-  state: string,
-  geographyName: string
+  options: ManufacturerGeographyOptions
 ): Promise<void> {
+  const preferredGeographyType =
+    options.flowType === 'custom'
+      ? 'Custom Region'
+      : options.flowType === 'ccc'
+        ? 'Custom Census Chain (CCC)'
+        : options.geographyType;
+
   await geographyCreationPage.clickSelect();
-  await geographyCreationPage.selectState(state);
-  await geographyCreationPage.fillGeographyName(geographyName);
+  await geographyCreationPage.selectState(options.state);
+  await geographyCreationPage.fillGeographyName(options.geographyName);
   await geographyCreationPage.moveAllStoresToTarget();
   await geographyCreationPage.clickCreateGeography();
+
+  if (preferredGeographyType) {
+    await geographyCreationPage.chooseGeographyTypeIfVisible(preferredGeographyType);
+  } else {
+    await geographyCreationPage.chooseGeographyTypeIfVisible();
+  }
+
   await geographyCreationPage.clickSave();
   await geographyCreationPage.clickReview();
+  await geographyCreationPage.clickApprove();
+  await geographyCreationPage.clickConfirm();
+
 }

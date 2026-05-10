@@ -13,7 +13,7 @@ export class HomePage {
     this.page = page;
     this.profileMenu = page.getByRole('link', { name: /profiles/i });
     this.addNewProfileButton = page.getByRole('button', { name: /add new profile/i });
-    this.manufacturerOption = page.getByText(/manufacturer/i);
+    this.manufacturerOption = page.getByRole('button', { name: /select manufacturer/i });
     this.retailerOption = page.getByRole('button', { name: /select retailer/i });
     this.circanaOption = page.getByRole('button', { name: /select circana profile/i });
     this.geographyLink = page.getByRole('link', { name: /geography/i });

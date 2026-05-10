@@ -9,7 +9,7 @@ async function openRetailerGeography(homePage: HomePage, geographyMainPage: Geog
   await homePage.openGeography();
   await geographyMainPage.openProfileSearch();
   await geographyMainPage.searchProfile(testData.search.profiles.retailer);
-  await geographyMainPage.selectProfile(1); 
+  await geographyMainPage.selectProfile(0); 
   await geographyMainPage.clickCreateNewGeographySet();
 }
 

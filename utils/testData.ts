@@ -4,7 +4,7 @@ export const testData = {
   // Client names for different profile types
   clients: {
     manufacturer: {
-      valid: 'ALCON',
+      valid: 'PHILIPS',
       invalid: 'PEPSICO', // Used for testing outlet selection
       disabled: 'TEST_DISABLED' // Placeholder for disabled client
     },
@@ -13,7 +13,8 @@ export const testData = {
       alternative: 'TEST_RETAILER'
     },
     circana: {
-      valid: 'CIRCANA_CLIENT'
+      valid: 'IRI',
+      valid2: 'IRI - BWS'
     }
   },
 
@@ -26,8 +27,13 @@ export const testData = {
       food: 'Food (FOOD)',
       convenience: 'Convenience (CONV)'
     },
+    circana: {
+      walmart: 'Walmart (WALM)',
+      food: 'Food (FOOD)',
+      convenience: 'Convenience (CONV)'
+    },
     retailer: {
-      mulc: 'MULC',
+      liq: 'LIQR',
       mass: 'MASS',
       conv: 'CONV'
     }
@@ -58,6 +64,8 @@ export const testData = {
       none: 'NONE - New Geography Set'
     },
     messages: {
+      releaseApproveCCC: 'Release evaluation approved. Redirecting to Geography Mapping...',
+      GeographyApproved: 'Geography set successfully approved and moving to next stage.',
       crmaApproved: 'CRMA data approved successfully',
       mappingSaved: 'Geography mappings have been saved successfully.',
       mappingApproved: 'Geography mapping successfully approved and moved to next stage.',
@@ -73,6 +81,10 @@ export const testData = {
     manufacturer: {
       clientVisibleName: 'Testing',
       cccEligible: {
+        yes: 'Yes',
+        no: 'No'
+      },
+      zipEligible:{
         yes: 'Yes',
         no: 'No'
       },
@@ -95,6 +107,14 @@ export const testData = {
     },
     circana: {
       clientVisibleName: 'Circana Test Profile',
+      zipEligible:{
+        yes: 'Yes',
+        no: 'No'
+      },
+       cccEligible: {
+        yes: 'Yes',
+        no: 'No'
+      },
       notes: 'Updated circana note'
     }
   },
