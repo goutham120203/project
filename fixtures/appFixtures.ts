@@ -10,6 +10,7 @@ import { GeographyMappingPage } from '../pages/geographyMappingPage';
 import { ReleaseEvaluationPage } from '../pages/releaseEvaluationPage';
 import { GeographyNamingPage } from '../pages/geographyNamingPage';
 import { FinalReviewPage } from '../pages/finalReviewPage';
+import { LoginPage } from '../pages/loginPage';
 
 type AppFixtures = {
   homePage: HomePage;
@@ -23,6 +24,7 @@ type AppFixtures = {
   releaseEvaluationPage: ReleaseEvaluationPage;
   geographyNamingPage: GeographyNamingPage;
   finalReviewPage: FinalReviewPage;
+  loginPage: LoginPage;
 };
 
 export const test = baseTest.extend<AppFixtures>({
@@ -41,6 +43,10 @@ export const test = baseTest.extend<AppFixtures>({
   retailerPage: async ({ page }, use) => {
     await use(new RetailerPage(page));
   },
+  loginPage: async ({ page }, use) => {
+    await use(new LoginPage(page));
+  },
+
   geographyMainPage: async ({ page }, use) => {
     await use(new GeographyMainPage(page));
   },

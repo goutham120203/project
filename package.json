@@ -6,7 +6,11 @@
   "scripts": {
     "test": "playwright test",
     "test:headed": "playwright test --headed",
-    "test:report": "playwright show-report"
+    "test:report": "playwright show-report",
+    "test:ec2": "set TEST_ENV=ec2&& playwright test",
+    "test:dev": "set TEST_ENV=dev&& playwright test",
+    "test:qa": "set TEST_ENV=qa&& playwright test",
+    "test:all-environments": "npm run test:ec2 && npm run test:dev && npm run test:qa"
   },
   "devDependencies": {
     "@playwright/test": "^1.44.0",

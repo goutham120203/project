@@ -19,13 +19,13 @@ test.describe('Retailer profile creation', () => {
     // await retailerPage.saveProfile();
     // await expect(page).toHaveURL(/\/profile\/list$/);
 
-    // Search for the created profile
+    // //Search for the created profile
     // await manageProfilesPage.searchProfile(clientVisibleName);
 
     // const profileCount = await manageProfilesPage.getProfileCount();
     // await expect(manageProfilesPage.profileCards).toHaveCount(1);
 
-    // Delete the profile
+    // //Delete the profile
     // await manageProfilesPage.deleteFirstProfile();
     // expect(await manageProfilesPage.isMessageVisible(testData.success.profileDeleted)).toBe(true);
     // await expect(page).toHaveURL(/\/profile\/list$/);
