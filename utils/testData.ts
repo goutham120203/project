@@ -35,7 +35,7 @@ export const testData = {
     retailer: {
       liq: 'LIQR',
       mass: 'MASS',
-      conv: 'CONV'
+      wal: 'WALM'
     }
   },
 

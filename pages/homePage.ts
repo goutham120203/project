@@ -1,4 +1,5 @@
 import { Page, Locator } from '@playwright/test';
+import envConfig from '../config/env';
 
 export class HomePage {
   readonly page: Page;
@@ -21,6 +22,24 @@ export class HomePage {
 
   async goto(): Promise<void> {
     await this.page.goto('/');
+
+    await this.navigateToApplication();
+  }
+
+  async navigateToApplication() {
+    switch (envConfig.name) {
+
+      case 'dev':
+        await this.page.locator('#menu-left').click();
+        await this.page.getByText('#menu-Geography-Builder').click();
+        break;
+
+      case 'qa':
+        await this.page.locator('#menu-left').click();
+        await this.page.getByText('#menu-Geography-Builder(qa)').click();
+        break;
+        break;
+    }
   }
 
   async title(): Promise<string> {

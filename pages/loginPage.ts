@@ -15,7 +15,8 @@ export class LoginPage {
   }
 
   async goto(): Promise<void> {
-    await this.page.goto(envConfig.loginPath);
+    const loginUrl = new URL(envConfig.loginPath, envConfig.baseURL).toString();
+    await this.page.goto(loginUrl);
   }
 
   async login(username: string, password: string): Promise<void> {

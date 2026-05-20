@@ -3,20 +3,42 @@ import envConfig, { getCredentials } from '../config/env';
 
 export async function login(page: Page): Promise<void> {
   const { username, password } = getCredentials();
-
-  await page.goto(envConfig.loginPath);
+  const loginUrl = new URL(envConfig.baseURL).toString();
+  await page.goto(loginUrl);
+  await page.waitForLoadState('networkidle');
 
   const usernameLocator = page.locator(envConfig.loginSelectors.username).first();
   const passwordLocator = page.locator(envConfig.loginSelectors.password).first();
   const submitLocator = page.locator(envConfig.loginSelectors.submitButton).first();
 
-  await expect(usernameLocator, 'Username input was not found on the login page').toBeVisible({ timeout: 10000 });
+  try {
+    await usernameLocator.waitFor({ state: 'visible', timeout: 10000 });
+  } catch (err) {
+    const currentUrl = page.url();
+    const snippet = (await page.content()).slice(0, 2000);
+    throw new Error(`Username input not found on login page (${currentUrl}). Page content snippet:\n${snippet}`);
+  }
+
   await usernameLocator.fill(username);
 
-  await expect(passwordLocator, 'Password input was not found on the login page').toBeVisible({ timeout: 10000 });
+  try {
+    await passwordLocator.waitFor({ state: 'visible', timeout: 10000 });
+  } catch (err) {
+    const currentUrl = page.url();
+    const snippet = (await page.content()).slice(0, 2000);
+    throw new Error(`Password input not found on login page (${currentUrl}). Page content snippet:\n${snippet}`);
+  }
+
   await passwordLocator.fill(password);
 
-  await expect(submitLocator, 'Login submit button was not found on the login page').toBeVisible({ timeout: 10000 });
+  try {
+    await submitLocator.waitFor({ state: 'visible', timeout: 10000 });
+  } catch (err) {
+    const currentUrl = page.url();
+    const snippet = (await page.content()).slice(0, 2000);
+    throw new Error(`Login submit button not found on login page (${currentUrl}). Page content snippet:\n${snippet}`);
+  }
+
   await submitLocator.click();
 
   await page.waitForLoadState('networkidle');

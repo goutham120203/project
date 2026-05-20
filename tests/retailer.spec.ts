@@ -80,7 +80,7 @@ test.describe('Retailer profile creation', () => {
     await homePage.openRetailer();
     await retailerPage.selectClientName(testData.clients.retailer.valid);
     await retailerPage.fillClientVisibleName(testData.profiles.retailer.clientVisibleName);
-    await retailerPage.selectOutlet(testData.outlets.retailer.conv);
+    await retailerPage.selectOutlet(testData.outlets.retailer.wal);
     expect(await retailerPage.isAuditRMASectionVisible()).toBe(true);
     expect(await retailerPage.isParentageSectionVisible()).toBe(true);
     expect(await retailerPage.isCRMAOutletSectionVisible()).toBe(true);
@@ -91,7 +91,7 @@ test.describe('Retailer profile creation', () => {
     await homePage.openRetailer();
     await retailerPage.selectClientName(testData.clients.retailer.valid);
     await retailerPage.fillClientVisibleName(testData.profiles.retailer.clientVisibleName);
-    await retailerPage.selectOutlet(testData.outlets.retailer.conv);
+    await retailerPage.selectOutlet(testData.outlets.retailer.wal);
     await retailerPage.saveProfile();
     // expect(await retailerPage.errorAuditOption()).toContain(testData.errors.audit.required);
     expect(await retailerPage.errorCRMAOutlet()).toContain(testData.errors.crma.required);

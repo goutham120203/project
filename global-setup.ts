@@ -16,7 +16,16 @@ export default async (): Promise<void> => {
   const browser = await chromium.launch();
   const page = await browser.newPage();
 
-  await login(page);
+  try {
+    await login(page);
+  } catch (err) {
+    const currentUrl = page.url();
+    const snippet = (await page.content()).slice(0, 2000);
+    throw new Error(
+      `Failed to authenticate during global setup. Tried ${currentUrl}.\nOriginal error: ${err instanceof Error ? err.message : String(err)}\nPage snippet:\n${snippet}\nPlease verify ${process.cwd()}/.env.${process.env.TEST_ENV ?? process.env.PLAYWRIGHT_ENV ?? 'dev'} and that the server is reachable at the configured BASE_URL/LOGIN_PATH.`
+    );
+  }
+
   await page.context().storageState({ path: storageStatePath });
 
   await browser.close();
