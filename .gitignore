@@ -27,3 +27,4 @@ yarn.lock
 .playwright/
 playwright-report/
  test-results/
+requirments/

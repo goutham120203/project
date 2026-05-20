@@ -25,6 +25,19 @@ export class GeographyMappingPage extends BasePage {
 
   async clickSave(): Promise<void> {
     await this.page.waitForURL(/.*geography-mapping/, { timeout: 20000 });
+    
+    // Wait for processing message to disappear
+    const processingMessage = this.page.getByText(/Processing Geography Mapping Data|process is in progress/i);
+    await processingMessage.waitFor({ state: 'visible', timeout: 10000 }).catch(() => {
+      // Message might not always appear, that's OK
+    });
+    
+    // Wait for processing message to disappear (max 60 seconds for data processing)
+    await processingMessage.waitFor({ state: 'hidden', timeout: 60000 }).catch(() => {
+      console.log('Processing message did not disappear, continuing anyway');
+    });
+    
+    // Now wait for table data to load
     await this.waitForDataAndClickRefresh();
     await this.saveButton.click();
   }

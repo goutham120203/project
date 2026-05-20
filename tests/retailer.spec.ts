@@ -1,20 +1,34 @@
 import { test, expect } from '../fixtures/appFixtures';
-import { testData } from '../utils/testData';
+import { testData, generateTestData } from '../utils/testData';
 
 test.describe('Retailer profile creation', () => {
-  test('creates a retailer profile with valid data', async ({ homePage, retailerPage, page }) => {
+  test('creates a retailer profile with valid data', async ({ homePage, retailerPage, manageProfilesPage, page }) => {
+
+    const clientVisibleName = generateTestData.clientVisibleName('Retailer');
     await homePage.goto();
     await homePage.openRetailer();
     await retailerPage.selectClientName(testData.clients.retailer.valid);
-    await retailerPage.fillClientVisibleName(testData.profiles.retailer.clientVisibleName);
-    await retailerPage.selectOutlet(testData.outlets.retailer.mulc);
+    await retailerPage.fillClientVisibleName(clientVisibleName);
+    await retailerPage.selectOutlet(testData.outlets.retailer.liq);
     await retailerPage.chooseFreshlook(testData.profiles.retailer.freshlook.yes);
     await retailerPage.chooseClosedAndSold(testData.profiles.retailer.closedAndSold.include);
     await retailerPage.fillOwnerNumber(testData.profiles.retailer.ownerNumber);
     await retailerPage.fillBannerName(testData.profiles.retailer.bannerName);
     await retailerPage.fillNotes(testData.profiles.retailer.notes);
+
     // await retailerPage.saveProfile();
-    // await expect(page).toHaveURL(/.*\/profiles/);
+    // await expect(page).toHaveURL(/\/profile\/list$/);
+
+    // //Search for the created profile
+    // await manageProfilesPage.searchProfile(clientVisibleName);
+
+    // const profileCount = await manageProfilesPage.getProfileCount();
+    // await expect(manageProfilesPage.profileCards).toHaveCount(1);
+
+    // //Delete the profile
+    // await manageProfilesPage.deleteFirstProfile();
+    // expect(await manageProfilesPage.isMessageVisible(testData.success.profileDeleted)).toBe(true);
+    // await expect(page).toHaveURL(/\/profile\/list$/);
   });
 
   test('shows retailer validation messages when mandatory fields are missing', async ({ homePage, retailerPage }) => {
@@ -66,7 +80,7 @@ test.describe('Retailer profile creation', () => {
     await homePage.openRetailer();
     await retailerPage.selectClientName(testData.clients.retailer.valid);
     await retailerPage.fillClientVisibleName(testData.profiles.retailer.clientVisibleName);
-    await retailerPage.selectOutlet(testData.outlets.retailer.conv);
+    await retailerPage.selectOutlet(testData.outlets.retailer.wal);
     expect(await retailerPage.isAuditRMASectionVisible()).toBe(true);
     expect(await retailerPage.isParentageSectionVisible()).toBe(true);
     expect(await retailerPage.isCRMAOutletSectionVisible()).toBe(true);
@@ -77,7 +91,7 @@ test.describe('Retailer profile creation', () => {
     await homePage.openRetailer();
     await retailerPage.selectClientName(testData.clients.retailer.valid);
     await retailerPage.fillClientVisibleName(testData.profiles.retailer.clientVisibleName);
-    await retailerPage.selectOutlet(testData.outlets.retailer.conv);
+    await retailerPage.selectOutlet(testData.outlets.retailer.wal);
     await retailerPage.saveProfile();
     // expect(await retailerPage.errorAuditOption()).toContain(testData.errors.audit.required);
     expect(await retailerPage.errorCRMAOutlet()).toContain(testData.errors.crma.required);
@@ -89,4 +103,5 @@ test.describe('Retailer profile creation', () => {
     await retailerPage.cancel();
     await expect(page).toHaveURL(/\/profile\/list$/);
   });
+
 });

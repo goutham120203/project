@@ -1,6 +1,6 @@
-import { Locator, Page } from '@playwright/test';
+import { Locator, Page, expect } from '@playwright/test';
 
-export class ManufacturerPage {
+export class CircanaPage {
   readonly page: Page;
   readonly clientNameSelect: Locator;
   readonly clientVisibleNameInput: Locator;
@@ -35,22 +35,23 @@ export class ManufacturerPage {
     await this.clientVisibleNameInput.fill(name);
   }
 
-  async chooseCccEligible(value: String): Promise<void> {
+  async verifyCccEligible(value: string): Promise<void> {
     const normalized = value.toLowerCase();
 
     if (normalized === 'yes') {
-      await this.cccEligibleYes.check();
-    } else if (normalized === 'no')  {
-      await this.cccEligibleNo.check();
+      await expect(this.cccEligibleYes).toBeChecked();
+    } else if (normalized === 'no') {
+      await expect(this.cccEligibleNo).toBeChecked();
     } else {
       throw new Error(`Invalid value for ccc: ${value}`);
     }
   }
 
+
   async chooseZipcode(value: String): Promise<void>{
     const normalized = value.toLowerCase();
 
-    if (value == 'yes') {
+    if (normalized == 'yes') {
       await this.zipcodeEligibleYes.check();
     }else if (normalized == 'no'){
       await this.zipcodeEligibleNo.check();

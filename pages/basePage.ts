@@ -55,17 +55,24 @@ export class BasePage {
     await this.page.waitForTimeout(timeout);
   }
 
-  async waitForLoaderToDisappear(): Promise<void> {
-    const loader = this.page.getByText('Loading...');
+  async waitForLoaderToDisappear(timeout = 30000): Promise<void> {
+    const loader = this.page.locator('text=Loading..., [aria-busy="true"], .spinner-border, .loading-spinner, .overlay-backdrop').first();
+
+    if ((await loader.count()) === 0) {
+      return;
+    }
 
     try {
-      await loader.waitFor({
-        state: 'hidden',
-        timeout: 30000
-      });
+      await loader.waitFor({ state: 'hidden', timeout });
     } catch {
-      // Loader may not appear every time
+      // loader may not disappear in time or was never visible
     }
+  }
+
+  async waitForElementToBeReady(locator: Locator, timeout = 15000): Promise<void> {
+    await expect(locator).toBeVisible({ timeout });
+    await expect(locator).toBeEnabled({ timeout });
+    await this.page.waitForTimeout(150);
   }
 
   async safeClick(locator: Locator): Promise<void> {
@@ -117,7 +124,13 @@ export class BasePage {
       if (refreshVisible) {
         console.log(`No data found. Clicking Refresh (${attempt})`);
 
-        await this.refreshButton.click();
+        try {
+          await this.refreshButton.click({ force: true, timeout: 5000 });
+        } catch (error) {
+          console.log(`Refresh click failed on attempt ${attempt}, retrying...`);
+          await this.page.waitForTimeout(1000);
+          continue;
+        }
 
         await this.waitForLoaderToDisappear();
       } else {
